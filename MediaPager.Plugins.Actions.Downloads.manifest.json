@@ -1,0 +1,19 @@
+{
+  "id": "mediapager.actions.downloads",
+  "name": "Downloads",
+  "description": "Download media from loaded stream providers into the local library.",
+  "author": "HappyGoLucky Dev",
+  "types": "actions",
+  "sdk": "MediaPager.App.PluginContracts",
+  "sdkVersion": "0.1.0",
+  "requires": [
+    {
+      "id": "mediapager.interface.download",
+      "repo": "https://github.com/happygolucky-dev/MediaPager.Plugins.Interface.Download.git"
+    }
+  ],
+  "discoverable": false,
+  "references": [
+    "https://github.com/happygolucky-dev/MediaPager.Plugins.Interface.Download.git"
+  ]
+}

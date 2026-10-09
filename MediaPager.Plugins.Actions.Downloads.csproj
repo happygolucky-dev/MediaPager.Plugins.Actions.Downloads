@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MediaPager.Plugins.Actions.Downloads</RootNamespace>
+    <Description>Plugin-owned downloads engine and activity surface.</Description>
+    <PackageId>MediaPager.Plugins.Actions.Downloads</PackageId>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../MediaPager/MediaPager.App.PluginContracts/MediaPager.App.PluginContracts.csproj"
+                      Condition="Exists('../MediaPager/MediaPager.App.PluginContracts/MediaPager.App.PluginContracts.csproj')" />
+    <ProjectReference Include="../MediaPager.App.PluginContracts/MediaPager.App.PluginContracts.csproj"
+                      Condition="Exists('../MediaPager.App.PluginContracts/MediaPager.App.PluginContracts.csproj')" />
+    <ProjectReference Include="../MediaPager.Plugins.Interface.Download/MediaPager.Plugins.Interface.Download.csproj" />
+  </ItemGroup>
+
+</Project>
