@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using MediaPager.App.PluginContracts;
 using MediaPager.Plugins.Interface.Download;
@@ -105,6 +106,9 @@ public sealed class DownloadsPlugin(
     {
         try
         {
+            job.Report(0, "Checking download tools…");
+            await EnsureMediaToolsAvailableAsync(job.CancellationToken);
+
             job.Report(0, "Resolving stream…");
             var (provider, source) = FindProvider(context);
             if (provider is null || source is null)
@@ -155,8 +159,7 @@ public sealed class DownloadsPlugin(
         }
         catch (Exception exception)
         {
-            job.Fail(exception.Message);
-            activity.Notify("Download failed", $"{title}: {exception.Message}", PluginNotificationLevel.Error);
+            ReportDownloadFailure(job, title, exception);
         }
     }
 
@@ -223,8 +226,7 @@ public sealed class DownloadsPlugin(
             if (scratchPath is not null) TryDelete(scratchPath);
             if (finalPath is not null && libraryItem.Created) TryDelete(finalPath);
             await RemovePendingLibraryItemAsync(libraryItem);
-            job.Fail(exception.Message);
-            activity.Notify("Download failed", $"{title}: {exception.Message}", PluginNotificationLevel.Error);
+            ReportDownloadFailure(job, title, exception);
         }
         finally
         {
@@ -251,6 +253,69 @@ public sealed class DownloadsPlugin(
     private void ReleaseSlot()
     {
         lock (concurrencyGate) activeJobs = Math.Max(0, activeJobs - 1);
+    }
+
+    private static async Task EnsureMediaToolsAvailableAsync(CancellationToken cancellationToken)
+    {
+        var missing = new List<string>();
+        foreach (var tool in new[] { "ffmpeg", "ffprobe" })
+        {
+            if (!await IsToolAvailableAsync(tool, cancellationToken))
+                missing.Add(tool);
+        }
+
+        if (missing.Count == 0) return;
+        throw new PluginOperationException(new PluginError(
+            "downloads.tools.missing",
+            $"The Downloads plugin requires ffmpeg and ffprobe, but these tools are unavailable: {string.Join(", ", missing)}.",
+            "Install FFmpeg (which includes ffmpeg and ffprobe) and make sure both executables are on PATH for the account running MediaPager, then retry."));
+    }
+
+    private static async Task<bool> IsToolAvailableAsync(string tool, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = tool,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            startInfo.ArgumentList.Add("-version");
+            using var process = Process.Start(startInfo);
+            if (process is null) return false;
+
+            var stdout = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var stderr = process.StandardError.ReadToEndAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            await Task.WhenAll(stdout, stderr);
+            return process.ExitCode == 0;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Win32Exception)
+        {
+            return false;
+        }
+        catch (FileNotFoundException)
+        {
+            return false;
+        }
+    }
+
+    private void ReportDownloadFailure(IPluginJob job, string title, Exception exception)
+    {
+        var error = exception is PluginOperationException pluginException
+            ? pluginException.Error
+            : new PluginError("downloads.failed", exception.Message);
+        var titledError = error with { Message = $"{title}: {error.Message}" };
+        job.FailWithError(titledError);
+        activity.NotifyError("Download failed", titledError, PluginNotificationLevel.Error);
+        activity.ClearJob(job);
     }
 
     private static async Task RunFfmpegAsync(IPluginJob job, Uri streamUri, string scratchPath, long? durationMicros)
