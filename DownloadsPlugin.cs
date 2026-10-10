@@ -45,6 +45,9 @@ public sealed class DownloadsPlugin(
         {
             foreach (var kind in descriptor.Kinds ?? Enum.GetValues<MediaKind>())
             {
+                if (await HasSpecializedDownloadActionAsync(kind, cancellationToken))
+                    continue;
+
                 var isAvailable = await IsAvailableAsync(kind, cancellationToken);
                 available.Add(descriptor with
                 {
@@ -56,6 +59,24 @@ public sealed class DownloadsPlugin(
             }
         }
         return available;
+    }
+
+    private async Task<bool> HasSpecializedDownloadActionAsync(MediaKind kind, CancellationToken cancellationToken)
+    {
+        foreach (var provider in pluginHost.GetPlugins<IDownloadProviderPlugin>())
+        {
+            if (ReferenceEquals(provider, this) || provider is not IPluginActions actions)
+                continue;
+
+            var declaredActions = await actions.GetActionsAsync(cancellationToken);
+            if (declaredActions.Any(action =>
+                    action.Click == PluginActionClick.Dispatch &&
+                    action.Scope == PluginActionScope.StreamItem &&
+                    action.Kinds?.Contains(kind) == true))
+                return true;
+        }
+
+        return false;
     }
 
     public IReadOnlyList<PluginSettingDefinition> Settings { get; } =
