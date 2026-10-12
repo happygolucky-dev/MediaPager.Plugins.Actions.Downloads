@@ -11,6 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../Official/MediaPager.App.PluginContracts/MediaPager.App.PluginContracts.csproj"
+                      Condition="Exists('../../Official/MediaPager.App.PluginContracts/MediaPager.App.PluginContracts.csproj')" />
     <ProjectReference Include="../MediaPager/MediaPager.App.PluginContracts/MediaPager.App.PluginContracts.csproj"
                       Condition="Exists('../MediaPager/MediaPager.App.PluginContracts/MediaPager.App.PluginContracts.csproj')" />
     <ProjectReference Include="../MediaPager.App.PluginContracts/MediaPager.App.PluginContracts.csproj"

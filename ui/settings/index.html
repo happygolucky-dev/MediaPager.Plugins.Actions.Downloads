@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Downloads settings</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #11151b;
+      color: #f3f5f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; background: #11151b; }
+    main { max-width: 780px; margin: 0 auto; }
+    h1 { margin: 4px 0 8px; font-size: 1.65rem; }
+    h2 { margin: 0 0 6px; font-size: 1.05rem; }
+    p { color: #aeb8c4; line-height: 1.5; }
+    .eyebrow { margin: 0; color: #77d8c1; font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .intro { margin: 0 0 22px; }
+    .panel { margin: 16px 0; padding: 18px; border: 1px solid #303943; border-radius: 12px; background: #191f27; }
+    .panel-copy { margin: 0 0 14px; font-size: .9rem; }
+    .catalog-grid, .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    label.field { display: flex; flex-direction: column; gap: 7px; color: #dce2e8; font-size: .88rem; }
+    select { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid #46515e; border-radius: 7px; background: #10151b; color: #f3f5f7; font: inherit; }
+    select:focus, button:focus-visible, input:focus-visible { outline: 2px solid #77d8c1; outline-offset: 2px; }
+    .mode-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .mode-row .panel-copy { margin-bottom: 0; }
+    .toggle, .check-row { display: inline-flex; align-items: center; gap: 10px; color: #e7ebef; font-size: .9rem; cursor: pointer; }
+    .toggle input, .check-row input { width: 18px; height: 18px; accent-color: #77d8c1; }
+    .profile-grid { margin-top: 18px; }
+    .easy-summary, .empty-note { margin: 14px 0 0; padding: 12px 14px; border-radius: 8px; background: #222b34; font-size: .88rem; }
+    .empty-note { color: #e4c981; }
+    .check-row { margin-top: 4px; }
+    .check-help { margin: 6px 0 0 28px; font-size: .82rem; }
+    .footer { display: flex; align-items: center; gap: 14px; margin-top: 20px; }
+    button { min-height: 40px; padding: 0 18px; border: 0; border-radius: 7px; background: #77d8c1; color: #10201d; font: inherit; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: wait; }
+    #status { min-height: 1.3em; color: #aeb8c4; font-size: .88rem; }
+    #status.error { color: #ff9d9d; }
+    [hidden] { display: none !important; }
+    @media (max-width: 520px) {
+      body { padding: 16px; }
+      .mode-row { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Downloads</p>
+      <h1>Download settings</h1>
+      <p class="intro">Choose where your downloads go. Easy mode uses reliable defaults; advanced mode lets you customize file formats.</p>
+    </header>
+
+    <section class="panel" aria-labelledby="destinations-heading">
+      <h2 id="destinations-heading">Save downloads to</h2>
+      <p class="panel-copy">Choose a destination for each kind of media you want to download.</p>
+      <div id="catalogs" class="catalog-grid"></div>
+      <p id="catalogs-empty" class="empty-note" hidden>No catalogs are available yet. Create catalogs in Settings → Catalogs, then return here.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="quality-heading">
+      <div class="mode-row">
+        <div>
+          <h2 id="quality-heading">Download quality</h2>
+          <p class="panel-copy">Easy mode is ready to use. Turn on advanced settings to choose file formats.</p>
+        </div>
+        <label class="toggle" for="advancedMode">
+          <input id="advancedMode" type="checkbox">
+          <span>Advanced settings</span>
+        </label>
+      </div>
+
+      <div id="easySummary" class="easy-summary">
+        Easy mode keeps video quality as-is and saves audio in a widely compatible format.
+      </div>
+
+      <div id="advancedFields" class="profile-grid" hidden>
+        <label class="field" for="videoProfile">
+          <span>Video files</span>
+          <select id="videoProfile">
+            <option value="CopyToMp4">Keep original quality (fastest)</option>
+            <option value="H264">Most compatible</option>
+            <option value="H265">Smaller file</option>
+            <option value="Av1">Smallest file (slower)</option>
+          </select>
+        </label>
+        <label class="field" for="audioProfile">
+          <span>Audio files</span>
+          <select id="audioProfile">
+            <option value="CopyAudio">Keep original audio (fastest)</option>
+            <option value="AacAudio">Recommended compatibility</option>
+            <option value="Mp3Audio">MP3 for broad device support</option>
+            <option value="OpusAudio">Smaller file</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="temporary-heading">
+      <h2 id="temporary-heading">Temporary files</h2>
+      <label class="check-row" for="scratchInCatalog">
+        <input id="scratchInCatalog" type="checkbox">
+        <span>Keep temporary files in the destination folder</span>
+      </label>
+      <p class="check-help">Turn this off to keep in-progress files in MediaPager's managed scratch folder.</p>
+    </section>
+
+    <div class="footer">
+      <button id="save" type="button">Save settings</button>
+      <span id="status" role="status" aria-live="polite"></span>
+    </div>
+  </main>
+
+  <script>
+    const pluginId = 'mediapager.actions.downloads'
+    const pluginSettingsPath = `/plugins/${encodeURIComponent(pluginId)}/settings`
+    const catalogFields = [
+      { key: 'catalog.movies', label: 'Movies', slug: 'movies' },
+      { key: 'catalog.tv-shows', label: 'TV shows', slug: 'tv-shows' },
+      { key: 'catalog.music', label: 'Music', slug: 'music' },
+      { key: 'catalog.podcasts', label: 'Podcasts', slug: 'podcasts' },
+      { key: 'catalog.audiobooks', label: 'Audiobooks', slug: 'audiobooks' },
+      { key: 'catalog.books', label: 'Books', slug: 'books' },
+    ]
+    const defaults = {
+      advancedMode: 'false',
+      videoProfile: 'CopyToMp4',
+      audioProfile: 'AacAudio',
+      scratchInCatalog: 'true',
+    }
+    const pending = new Map()
+    let requestNumber = 0
+    let values = { ...defaults }
+    let catalogs = []
+
+    function request(method, url, body) {
+      return new Promise((resolve, reject) => {
+        const id = String(++requestNumber)
+        const timeout = setTimeout(() => {
+          pending.delete(id)
+          reject(new Error('The app did not respond in time.'))
+        }, 15000)
+        pending.set(id, { resolve, reject, timeout })
+        parent.postMessage({
+          source: 'mediapager-plugin',
+          type: 'api',
+          id,
+          method,
+          url,
+          body,
+        }, '*')
+      })
+    }
+
+    window.addEventListener('message', (event) => {
+      if (event.source !== parent || event.data?.source !== 'mediapager' || event.data?.type !== 'api-response')
+        return
+      const waiter = pending.get(String(event.data.id))
+      if (!waiter) return
+      clearTimeout(waiter.timeout)
+      pending.delete(String(event.data.id))
+      if (event.data.status < 200 || event.data.status >= 300) {
+        waiter.reject(new Error(event.data.body?.detail ?? 'The request failed.'))
+        return
+      }
+      waiter.resolve(event.data.body)
+    })
+
+    function setStatus(text, isError = false) {
+      const status = document.getElementById('status')
+      status.textContent = text
+      status.classList.toggle('error', isError)
+    }
+
+    function renderCatalogFields() {
+      const container = document.getElementById('catalogs')
+      container.replaceChildren()
+      for (const field of catalogFields) {
+        const label = document.createElement('label')
+        label.className = 'field'
+        label.htmlFor = `setting-${field.key}`
+
+        const title = document.createElement('span')
+        title.textContent = `${field.label} destination`
+        label.append(title)
+
+        const select = document.createElement('select')
+        select.id = `setting-${field.key}`
+        select.dataset.settingKey = field.key
+        const empty = document.createElement('option')
+        empty.value = ''
+        empty.textContent = `Choose a ${field.label} catalog…`
+        select.append(empty)
+
+        const matches = catalogs.filter((catalog) => catalog.catalogType?.slug === field.slug)
+        for (const catalog of matches) {
+          const option = document.createElement('option')
+          option.value = String(catalog.id)
+          option.textContent = catalog.name
+          select.append(option)
+        }
+        const selected = values[field.key]
+        select.value = selected == null ? '' : String(selected)
+        label.append(select)
+        container.append(label)
+      }
+
+      document.getElementById('catalogs-empty').hidden = catalogs.length > 0
+    }
+
+    function updateMode() {
+      const advanced = document.getElementById('advancedMode').checked
+      document.getElementById('advancedFields').hidden = !advanced
+      document.getElementById('easySummary').hidden = advanced
+    }
+
+    async function load() {
+      setStatus('Loading settings…')
+      try {
+        const [settings, availableCatalogs] = await Promise.all([
+          request('GET', pluginSettingsPath),
+          request('GET', '/catalogs'),
+        ])
+        values = { ...defaults, ...(settings?.values ?? {}) }
+        catalogs = Array.isArray(availableCatalogs) ? availableCatalogs : []
+        renderCatalogFields()
+        document.getElementById('advancedMode').checked = String(values.advancedMode).toLowerCase() === 'true'
+        document.getElementById('videoProfile').value = values.videoProfile || defaults.videoProfile
+        document.getElementById('audioProfile').value = values.audioProfile || defaults.audioProfile
+        document.getElementById('scratchInCatalog').checked = String(values.scratchInCatalog).toLowerCase() !== 'false'
+        updateMode()
+        setStatus('')
+      } catch (error) {
+        setStatus(error.message || 'Could not load Downloads settings.', true)
+      }
+    }
+
+    async function save() {
+      const button = document.getElementById('save')
+      button.disabled = true
+      setStatus('Saving…')
+      const payload = {
+        advancedMode: String(document.getElementById('advancedMode').checked),
+        videoProfile: document.getElementById('videoProfile').value || defaults.videoProfile,
+        audioProfile: document.getElementById('audioProfile').value || defaults.audioProfile,
+        scratchInCatalog: String(document.getElementById('scratchInCatalog').checked),
+      }
+      for (const field of catalogFields) {
+        const select = document.getElementById(`setting-${field.key}`)
+        payload[field.key] = select.value || null
+      }
+
+      try {
+        await request('PUT', pluginSettingsPath, payload)
+        values = { ...values, ...payload }
+        setStatus('Settings saved.')
+      } catch (error) {
+        setStatus(error.message || 'Could not save Downloads settings.', true)
+      } finally {
+        button.disabled = false
+      }
+    }
+
+    document.getElementById('advancedMode').addEventListener('change', updateMode)
+    document.getElementById('save').addEventListener('click', save)
+    load()
+    parent.postMessage({ source: 'mediapager-plugin', type: 'ready' }, '*')
+  </script>
+</body>
+</html>
