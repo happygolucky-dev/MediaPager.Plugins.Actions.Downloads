@@ -12,6 +12,12 @@ catalog IDs, names, and media types through the host bridge; it does not receive
 or catalog filesystem paths. Easy mode uses the recommended video/audio defaults. Advanced
 mode exposes friendly dropdowns for choosing alternate output formats.
 
+Movie and other non-TV stream items can be queued from poster cards or detail screens. TV
+downloads are offered from the TV detail screen: individual episodes have their own action,
+season and series actions confirm before queuing, and each selected episode is resolved and
+transferred sequentially. TV episode metadata is saved under its series and season in the
+destination catalog.
+
 FFmpeg 9.0.2 and FFprobe are provisioned on first use into the app-managed tools cache
 (`Tools:Directory/ffmpeg/9.0.2/<runtime-id>`). Platform archives are SHA-256 checked; the
 host does not use or modify the OS `PATH`.
