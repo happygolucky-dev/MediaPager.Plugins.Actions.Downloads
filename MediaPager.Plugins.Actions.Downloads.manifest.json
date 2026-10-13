@@ -6,6 +6,8 @@
   "types": "actions",
   "sdk": "MediaPager.App.PluginContracts",
   "sdkVersion": "0.1.0",
+  "worker": true,
+  "hostCapabilities": ["media-tools"],
   "requires": [
     {
       "id": "mediapager.interface.download",
